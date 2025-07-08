@@ -82,7 +82,7 @@ const device2Data = ref({
 const fetchDeviceData = async () => {
   // Device 1
   try {
-    const { data } = await axios.get("http://localhost:6006/device", { params: { id: 1 } });
+    const { data } = await axios.get("http://localhost:6007/device", { params: { id: 1 } });
     console.log("Device:", data);
     if (data && data.message === "success" && data.data) {
       device1Data.value = data.data;
@@ -92,7 +92,7 @@ const fetchDeviceData = async () => {
   }
   // Device 2
   try {
-    const { data } = await axios.get("http://localhost:6006/device", { params: { id: 2 } });
+    const { data } = await axios.get("http://localhost:6007/device", { params: { id: 2 } });
     console.log("Device:", data);
     if (data && data.message === "success" && data.data) {
       device2Data.value = data.data;
@@ -103,18 +103,44 @@ const fetchDeviceData = async () => {
 };
 
 const toggleDeviceStatus = async (deviceId: number) => {
+  // 1. 根据 deviceId 选择对应的数据对象（device1Data 或 device2Data）
   const deviceData = deviceId === 1 ? device1Data : device2Data;
+
+  // 2. 计算新的状态：如果当前 Status 是 1（开），就变成 0（关）；如果是 0（关），就变成 1（开）
   const newStatus = deviceData.value.Status === 1 ? 0 : 1;
+
   try {
-    await axios.post(
-      "http://localhost:6006/command",
-      { id: deviceId, status: newStatus },
-      { headers: { "Content-Type": "application/json" } }
-    );
+    // 3. 发送 GET 请求到后端，告知要切换的插座 id 以及新的 status
+    await axios.get("http://localhost:6007/command", { params: { id: deviceId, status: newStatus } });
+
+    // 4. 前端本地也同步更新 status，保证界面立即响应
   } catch (e) {
-    // 可选：错误处理
+    // 5. 如果请求失败，可以在这里做错误处理（比如弹窗提示等）
   }
 };
+// function toggleDeviceStatus(deviceId) {
+//   const deviceData = deviceId === 1 ? device1Data : device2Data;
+//   const newStatus = deviceData.value.Status === 1 ? 0 : 1;
+
+//   axios({
+//     method: "post",
+//     url: "http://localhost:6006/command",
+//     data: {
+//       id: deviceId,
+//       status: newStatus
+//     },
+//     headers: {
+//       "Content-Type": "application/json"
+//     },
+//     responseType: "json"
+//   })
+//     .then(response => {
+//       console.log(response);
+//     })
+//     .catch(error => {
+//       console.log(error);
+//     });
+// }
 
 onMounted(() => {
   fetchDeviceData();

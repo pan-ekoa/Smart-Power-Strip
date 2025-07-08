@@ -90,7 +90,7 @@ const sendCode = async () => {
   }
 
   try {
-    const response = await fetch("http://localhost:6006/auth/send_code", {
+    const response = await fetch("http://localhost:6007/auth/send_code", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: form.value.email })
@@ -143,7 +143,7 @@ const confirmUpdate = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:6006/auth/find_password", {
+      const response = await fetch("http://localhost:6007/auth/find_password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

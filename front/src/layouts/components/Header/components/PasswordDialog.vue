@@ -78,7 +78,7 @@ const confirmUpdate = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:6006/auth/update/password", {
+      const response = await fetch("http://localhost:6007/auth/update/password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

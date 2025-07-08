@@ -1,5 +1,5 @@
 server {
-    listen 6006;  # 修改为AutoDL可访问的端口
+    listen 6007;  # 修改为AutoDL可访问的端口
     server_name _;  # 可以替换为你的域名
 
     location / {
