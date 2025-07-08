@@ -14,20 +14,4 @@ control_bp = Blueprint('StripControl', __name__)
 def Control_Strip():
     data = request.json
     print(data)
-    devices = get_latest_electrical_params()
-    
-    if device_id:
-        devices = [d for d in devices if str(d.device_id) == device_id]
-        if not devices:
-            return api_response(False, "Device not found", None, 404)
-    
-    data = [{
-        'DeviceID': d.device_id,
-        'Voltage': d.voltage,
-        'Current': d.current,
-        'Power': d.power,
-        'Energy': d.electricity,
-        'Status': int(d.control_signal),
-        'Time': d.event_time.isoformat() if d.event_time else None
-    } for d in devices]
-    return api_response(True, "success", data[0])
+    return api_response(True, "success")
