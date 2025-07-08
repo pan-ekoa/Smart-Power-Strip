@@ -3,12 +3,8 @@
     <div class="socket-box">
       <div class="socket-left">
         <div class="device-title"><span class="device-label">Device</span><span class="device-num">1</span></div>
-        <div
-          class="switch-circle"
-          :class="{ on: device1Data.Status === 1, off: device1Data.Status !== 1 }"
-          @click="toggleDeviceStatus(1)"
-        ></div>
-        <div class="switch-toggle"></div>
+        <div class="switch-circle" :class="{ on: device1Data.Status === 1, off: device1Data.Status !== 1 }"></div>
+        <div class="switch-toggle" @click="toggleDeviceStatus(1)"></div>
       </div>
       <div class="socket-content">
         <div class="socket-item">
@@ -34,12 +30,8 @@
     <div class="socket-box socket-box-2">
       <div class="socket-left">
         <div class="device-title"><span class="device-label">Device</span><span class="device-num">2</span></div>
-        <div
-          class="switch-circle"
-          :class="{ on: device2Data.Status === 1, off: device2Data.Status !== 1 }"
-          @click="toggleDeviceStatus(2)"
-        ></div>
-        <div class="switch-toggle"></div>
+        <div class="switch-circle" :class="{ on: device2Data.Status === 1, off: device2Data.Status !== 1 }"></div>
+        <div class="switch-toggle" @click="toggleDeviceStatus(2)"></div>
       </div>
       <div class="socket-content">
         <div class="socket-item">
@@ -114,8 +106,11 @@ const toggleDeviceStatus = async (deviceId: number) => {
   const deviceData = deviceId === 1 ? device1Data : device2Data;
   const newStatus = deviceData.value.Status === 1 ? 0 : 1;
   try {
-    await axios.get("http://localhost:6006/command", { params: { id: deviceId, status: newStatus } });
-    deviceData.value.Status = newStatus;
+    await axios.post(
+      "http://localhost:6006/command",
+      { id: deviceId, status: newStatus },
+      { headers: { "Content-Type": "application/json" } }
+    );
   } catch (e) {
     // 可选：错误处理
   }
