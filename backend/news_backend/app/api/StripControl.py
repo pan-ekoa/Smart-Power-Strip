@@ -2,15 +2,18 @@ from flask import request, Blueprint, jsonify
 from app.models.Process_Data import get_latest_electrical_params
 from app.utils.common import api_response
 
-import time
-import json
+from huaweicloudsdkcore.exceptions import exceptions
+from huaweicloudsdkcore.region.region import Region
+from huaweicloudsdkiotda.v5 import *
+from huaweicloudsdkcore.auth.credentials import BasicCredentials
+from huaweicloudsdkcore.auth.credentials import DerivedCredentials
 
+control_bp = Blueprint('StripControl', __name__)
 
-Datareturn_bp = Blueprint('device', __name__)
-
-@Datareturn_bp.route('/', methods=['GET'])
-def get_latest_electrical():
-    device_id = request.args.get('id')
+@control_bp.route('/', methods=['POST'])
+def Control_Strip():
+    data = request.json
+    print(data)
     devices = get_latest_electrical_params()
     
     if device_id:
@@ -28,4 +31,3 @@ def get_latest_electrical():
         'Time': d.event_time.isoformat() if d.event_time else None
     } for d in devices]
     return api_response(True, "success", data[0])
-
