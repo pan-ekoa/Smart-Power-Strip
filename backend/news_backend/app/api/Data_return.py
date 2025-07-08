@@ -27,5 +27,4 @@ def get_latest_electrical():
         'Status': int(d.control_signal),
         'Time': d.event_time.isoformat() if d.event_time else None
     } for d in devices]
-    print(data[0])
     return api_response(True, "success", data[0])

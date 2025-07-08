@@ -89,6 +89,7 @@ const fetchDeviceData = async () => {
   // Device 2
   try {
     const { data } = await axios.get("http://localhost:6006/device", { params: { id: 2 } });
+    console.log("Device:", data);
     if (data && data.message === "success" && data.data) {
       device2Data.value = data.data;
     }
