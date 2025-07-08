@@ -1,7 +1,5 @@
 # auth.py
 from flask import current_app, request, Blueprint, url_for
-from app import db, mail
-from app.models.user import User, UserRegistrationSchema, UserResponseSchema
 import random
 import string
 from datetime import datetime, timedelta

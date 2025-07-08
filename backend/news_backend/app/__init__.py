@@ -14,7 +14,7 @@ CORS(app)
 # print("MAIL_PASSWORD from env:", os.environ.get("MAIL_PASSWORD"))
 
 # 配置数据库连接
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:19232416@127.0.0.1:3306/devive_monitoring'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:19232416@127.0.0.1:3306/device_monitoring'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # 这个不关会有警告！
 db = SQLAlchemy(app)
 
@@ -22,6 +22,4 @@ from app.api.auth import auth
 app.register_blueprint(auth, url_prefix='/auth')
 
 from app.api.Data_return import Datareturn_bp
-app.register_blueprint(Datareturn_bp, url_prefix='/home')
-
-
+app.register_blueprint(Datareturn_bp, url_prefix='/device')

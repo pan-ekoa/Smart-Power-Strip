@@ -1,7 +1,7 @@
-from app import db, ma
+from app import db
 from marshmallow import validate
 from marshmallow import ValidationError
-
+"""
 def validate_qq_email(email):
     if not email.endswith('@qq.com'):
         raise ValidationError('请输入QQ邮箱')
@@ -48,4 +48,5 @@ class UserResponseSchema(ma.Schema):
 # 初始化 schemas
 user_registration_schema = UserRegistrationSchema()
 user_response_schema = UserResponseSchema()
-users_response_schema = UserResponseSchema(many=True) 
+users_response_schema = UserResponseSchema(many=True) "
+"""

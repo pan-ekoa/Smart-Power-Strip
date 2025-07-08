@@ -3,25 +3,50 @@
     <div class="socket-box">
       <div class="socket-left">
         <div class="device-title"><span class="device-label">Device</span><span class="device-num">1</span></div>
-        <div class="switch-circle" :class="{ on: status === 1, off: status !== 1 }"></div>
+        <div class="switch-circle" :class="{ on: device1Data.Status === 1, off: device1Data.Status !== 1 }"></div>
         <div class="switch-toggle"></div>
       </div>
       <div class="socket-content">
         <div class="socket-item">
           <div class="item-label">电压</div>
-          <div class="item-value">--</div>
+          <div class="item-value">{{ device1Data.Voltage }} <span class="unit">V</span></div>
         </div>
         <div class="socket-item">
           <div class="item-label">电流</div>
-          <div class="item-value">--</div>
+          <div class="item-value">{{ device1Data.Current }} <span class="unit">A</span></div>
         </div>
         <div class="socket-item">
           <div class="item-label">功率</div>
-          <div class="item-value">--</div>
+          <div class="item-value">{{ device1Data.Power }} <span class="unit">W</span></div>
         </div>
         <div class="socket-item">
           <div class="item-label">电能</div>
-          <div class="item-value">--</div>
+          <div class="item-value">{{ device1Data.Energy }} <span class="unit">kWh</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="socket-box socket-box-2">
+      <div class="socket-left">
+        <div class="device-title"><span class="device-label">Device</span><span class="device-num">2</span></div>
+        <div class="switch-circle" :class="{ on: device2Data.Status === 1, off: device2Data.Status !== 1 }"></div>
+        <div class="switch-toggle"></div>
+      </div>
+      <div class="socket-content">
+        <div class="socket-item">
+          <div class="item-label">电压</div>
+          <div class="item-value">{{ device2Data.Voltage }} <span class="unit">V</span></div>
+        </div>
+        <div class="socket-item">
+          <div class="item-label">电流</div>
+          <div class="item-value">{{ device2Data.Current }} <span class="unit">A</span></div>
+        </div>
+        <div class="socket-item">
+          <div class="item-label">功率</div>
+          <div class="item-value">{{ device2Data.Power }} <span class="unit">W</span></div>
+        </div>
+        <div class="socket-item">
+          <div class="item-label">电能</div>
+          <div class="item-value">{{ device2Data.Energy }} <span class="unit">kWh</span></div>
         </div>
       </div>
     </div>
@@ -33,20 +58,47 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-// 页面只展示四个标题，无需 JS 逻辑
-// 假设后端返回的Status
-const status = ref(0); // 默认0，后续可用后端数据替换
+import axios from "axios";
 
-// 示例：模拟后端请求Status
-const fetchStatus = async () => {
-  // 这里用setTimeout模拟异步请求，实际可用axios等替换
-  setTimeout(() => {
-    status.value = 1; // 1为红色，0为灰色
-  }, 1000);
+const device1Data = ref({
+  Voltage: "--",
+  Current: "--",
+  Power: "--",
+  Energy: "--",
+  Status: 0
+});
+const device2Data = ref({
+  Voltage: "--",
+  Current: "--",
+  Power: "--",
+  Energy: "--",
+  Status: 0
+});
+
+const fetchDeviceData = async () => {
+  // Device 1
+  try {
+    const { data } = await axios.get("http://localhost:6006/device", { params: { id: 1 } });
+    console.log("Device:", data);
+    if (data && data.message === "success" && data.data) {
+      device1Data.value = data.data;
+    }
+  } catch (e) {
+    // 可选：错误处理
+  }
+  // Device 2
+  try {
+    const { data } = await axios.get("http://localhost:6006/device", { params: { id: 2 } });
+    if (data && data.message === "success" && data.data) {
+      device2Data.value = data.data;
+    }
+  } catch (e) {
+    // 可选：错误处理
+  }
 };
 
 onMounted(() => {
-  fetchStatus();
+  fetchDeviceData();
 });
 </script>
 
@@ -71,6 +123,10 @@ onMounted(() => {
   align-items: stretch;
   padding: 0 48px;
   position: relative;
+}
+
+.socket-box-2 {
+  margin-top: 40px;
 }
 
 .socket-left {
@@ -197,5 +253,11 @@ onMounted(() => {
 .content-row {
   flex: 1;
   /* 可根据需要添加内容或样式 */
+}
+
+.unit {
+  font-size: 1.1rem;
+  color: #888;
+  margin-left: 2px;
 }
 </style>
