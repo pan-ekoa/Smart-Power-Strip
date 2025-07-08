@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 
 const device1Data = ref({
@@ -142,8 +142,15 @@ const toggleDeviceStatus = async (deviceId: number) => {
 //     });
 // }
 
+let timer: number | undefined;
+
 onMounted(() => {
   fetchDeviceData();
+  timer = window.setInterval(fetchDeviceData, 2000);
+});
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
 });
 </script>
 
