@@ -17,9 +17,11 @@
         </div>
         <div class="socket-item">
           <div class="item-label">功率</div>
-          <div class="item-value">{{ device1Data.Power }} <span class="unit">W</span></div>
+          <div class="item-value">
+            {{ isNaN(Number(device1Data.Power)) ? "--" : Number(device1Data.Power).toFixed(2) }} <span class="unit">W</span>
+          </div>
         </div>
-        <div class="socket-item">
+        <div class="socket-item energy-item">
           <div class="item-label">电能</div>
           <div class="item-value">{{ device1Data.Energy }} <span class="unit">kWh</span></div>
         </div>
@@ -42,9 +44,11 @@
         </div>
         <div class="socket-item">
           <div class="item-label">功率</div>
-          <div class="item-value">{{ device2Data.Power }} <span class="unit">W</span></div>
+          <div class="item-value">
+            {{ isNaN(Number(device2Data.Power)) ? "--" : Number(device2Data.Power).toFixed(2) }} <span class="unit">W</span>
+          </div>
         </div>
-        <div class="socket-item">
+        <div class="socket-item energy-item">
           <div class="item-label">电能</div>
           <div class="item-value">{{ device2Data.Energy }} <span class="unit">kWh</span></div>
         </div>
@@ -216,7 +220,8 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   height: 100%;
-  margin-left: 20px;
+  margin-left: 40px;
+  width: 660px;
 }
 .socket-item {
   width: 140px;
@@ -249,6 +254,9 @@ onMounted(() => {
   color: #333;
   min-height: 36px;
   font-family: "Segoe UI", "Consolas", "Menlo", "Monaco", monospace;
+}
+.energy-item {
+  width: 200px !important;
 }
 
 .content-row {
