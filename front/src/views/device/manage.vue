@@ -9,7 +9,10 @@
     </div>
     <div v-if="selectedDevice === 'all' || selectedDevice === '1'" class="device-box">
       <div class="device-header">
-        <h3 class="device-title device-title--deep">Device 1</h3>
+        <div>
+          <h3 class="device-title device-title--deep">Device 1</h3>
+          <div v-if="device1LastUpdate" class="update-time">{{ getUpdateText(device1LastUpdate) }}</div>
+        </div>
         <div class="device-actions">
           <el-switch v-model="device1On" @change="handleSwitch(1)" active-text="开" inactive-text="关" />
           <el-button size="small" type="primary" @click="openTimeDialog(1)">
@@ -19,12 +22,20 @@
         </div>
       </div>
       <div class="charts-row">
-        <div class="chart-box">图表1</div>
-        <div class="chart-box">图表2</div>
+        <div class="chart-box">
+          <EChartsLine :data="device1Voltage" :time="device1TimeArray" title="电压变化趋势图" />
+        </div>
+        <div class="chart-box">
+          <EChartsLine :data="device1Current" :time="device1TimeArray" title="电流变化趋势图" />
+        </div>
       </div>
       <div class="charts-row">
-        <div class="chart-box">图表3</div>
-        <div class="chart-box">图表4</div>
+        <div class="chart-box">
+          <EChartsLine :data="device1Power" :time="device1TimeArray" title="功率变化趋势图" />
+        </div>
+        <div class="chart-box">
+          <EChartsLine :data="device1Energy" :time="device1TimeArray" title="电能变化趋势图" />
+        </div>
       </div>
       <!-- 这里可以放设备1的详细信息或操作 -->
       <div class="advice-section">
@@ -38,7 +49,7 @@
       </div>
       <el-dialog v-model="timeDialogVisible1" title="设置定时开关时间" width="340px" align-center>
         <div style="margin-bottom: 16px; color: #666">请选择设备的定时开关时间</div>
-        <el-time-picker v-model="device1Time" placeholder="选择时间" style="width: 100%" arrow-control />
+        <el-time-picker v-model="device1TimePicker" placeholder="选择时间" style="width: 100%" arrow-control />
         <template #footer>
           <div style="text-align: center">
             <el-button @click="timeDialogVisible1 = false">取消</el-button>
@@ -49,7 +60,10 @@
     </div>
     <div v-if="selectedDevice === 'all' || selectedDevice === '2'" class="device-box">
       <div class="device-header">
-        <h3 class="device-title device-title--deep">Device 2</h3>
+        <div>
+          <h3 class="device-title device-title--deep">Device 2</h3>
+          <div v-if="device2LastUpdate" class="update-time">{{ getUpdateText(device2LastUpdate) }}</div>
+        </div>
         <div class="device-actions">
           <el-switch v-model="device2On" @change="handleSwitch(2)" active-text="开" inactive-text="关" />
           <el-button size="small" type="primary" @click="openTimeDialog(2)">
@@ -59,12 +73,20 @@
         </div>
       </div>
       <div class="charts-row">
-        <div class="chart-box">图表1</div>
-        <div class="chart-box">图表2</div>
+        <div class="chart-box">
+          <EChartsLine :data="device2Voltage" :time="device2TimeArray" title="电压变化趋势图" />
+        </div>
+        <div class="chart-box">
+          <EChartsLine :data="device2Current" :time="device2TimeArray" title="电流变化趋势图" />
+        </div>
       </div>
       <div class="charts-row">
-        <div class="chart-box">图表3</div>
-        <div class="chart-box">图表4</div>
+        <div class="chart-box">
+          <EChartsLine :data="device2Power" :time="device2TimeArray" title="功率变化趋势图" />
+        </div>
+        <div class="chart-box">
+          <EChartsLine :data="device2Energy" :time="device2TimeArray" title="电能变化趋势图" />
+        </div>
       </div>
       <!-- 这里可以放设备2的详细信息或操作 -->
       <div class="advice-section">
@@ -78,7 +100,7 @@
       </div>
       <el-dialog v-model="timeDialogVisible2" title="设置定时开关时间" width="340px" align-center>
         <div style="margin-bottom: 16px; color: #666">请选择设备的定时开关时间</div>
-        <el-time-picker v-model="device2Time" placeholder="选择时间" style="width: 100%" arrow-control />
+        <el-time-picker v-model="device2TimePicker" placeholder="选择时间" style="width: 100%" arrow-control />
         <template #footer>
           <div style="text-align: center">
             <el-button @click="timeDialogVisible2 = false">取消</el-button>
@@ -93,19 +115,79 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Clock, InfoFilled } from "@element-plus/icons-vue";
+import axios from "axios";
+import EChartsLine from "@/components/ECharts/EChartsLine.vue";
 const selectedDevice = ref("all");
 const device1On = ref(false);
 const device2On = ref(false);
 const timeDialogVisible1 = ref(false);
 const timeDialogVisible2 = ref(false);
-const device1Time = ref("");
-const device2Time = ref("");
+const device1TimePicker = ref("");
+const device2TimePicker = ref("");
 const adviceVisible1 = ref(false);
 const adviceVisible2 = ref(false);
 
-function handleSwitch(_device: number) {
-  // 这里可以处理开关逻辑
-  _device === 1;
+// Device 1数据更新时间
+const device1LastUpdate = ref(0);
+const device2LastUpdate = ref(0);
+// Device 1数据
+const device1Energy = ref<number[]>([]);
+const device1Current = ref<number[]>([]);
+const device1Voltage = ref<number[]>([]);
+const device1Power = ref<number[]>([]);
+const device1TimeArray = ref<string[] | number[]>([]);
+// Device 2数据
+const device2Energy = ref<number[]>([]);
+const device2Current = ref<number[]>([]);
+const device2Voltage = ref<number[]>([]);
+const device2Power = ref<number[]>([]);
+const device2TimeArray = ref<string[] | number[]>([]);
+
+async function fetchDeviceArrays(deviceId: number) {
+  try {
+    const { data } = await axios.get("http://localhost:6007/device", { params: { id: deviceId } });
+    if (data && data.message === "success" && data.data) {
+      const now = Date.now();
+      if (deviceId === 1) {
+        device1Energy.value = data.data.energy || [];
+        device1Current.value = data.data.current || [];
+        device1Voltage.value = data.data.voltage || [];
+        device1Power.value = data.data.power || [];
+        device1TimeArray.value = data.data.time || [];
+        device1LastUpdate.value = now;
+      } else if (deviceId === 2) {
+        device2Energy.value = data.data.energy || [];
+        device2Current.value = data.data.current || [];
+        device2Voltage.value = data.data.voltage || [];
+        device2Power.value = data.data.power || [];
+        device2TimeArray.value = data.data.time || [];
+        device2LastUpdate.value = now;
+      }
+    }
+  } catch (e) {
+    // 可选：错误处理
+  }
+}
+
+fetchDeviceArrays(1);
+fetchDeviceArrays(2);
+
+// const mock60 = Array.from({ length: 60 }, (_, i) => i + 1);
+// device1Voltage.value = mock60.map(x => 220 + Math.sin(x / 10) * 10);
+// device1Current.value = mock60.map(x => 5 + Math.cos(x / 8) * 2);
+// device1Power.value = mock60.map(x => 1000 + Math.sin(x / 7) * 100);
+// device1Energy.value = mock60.map(x => 10 + x * 0.1 + Math.random() * 0.2);
+// device1TimeArray.value = mock60.map(x => `${x < 10 ? "0" : ""}${x}:00`);
+
+function handleSwitch(device: number) {
+  // 1. 计算新状态
+  const isOn = device === 1 ? device1On.value : device2On.value;
+  const newStatus = isOn ? 1 : 0;
+
+  // 2. 发送请求到后端
+  axios.get("http://localhost:6007/command", { params: { id: device, status: newStatus } }).catch(() => {
+    // 可选：错误处理，比如弹窗提示
+  });
 }
 function openTimeDialog(device: number) {
   if (device === 1) timeDialogVisible1.value = true;
@@ -113,6 +195,11 @@ function openTimeDialog(device: number) {
 }
 function saveTime(device: number) {
   // 这里可以处理保存时间逻辑
+  let time = device === 1 ? device1TimePicker.value : device2TimePicker.value;
+  // 发送请求到后端
+  axios.get("http://localhost:6007/set_time", { params: { id: device, time } }).catch(() => {
+    // 可选：错误处理，比如弹窗提示
+  });
   if (device === 1) timeDialogVisible1.value = false;
   else if (device === 2) timeDialogVisible2.value = false;
 }
@@ -120,6 +207,15 @@ function saveTime(device: number) {
 function toggleAdvice(device: number) {
   if (device === 1) adviceVisible1.value = !adviceVisible1.value;
   else if (device === 2) adviceVisible2.value = !adviceVisible2.value;
+}
+
+function getUpdateText(ts: number) {
+  if (!ts) return "";
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return `刚刚更新了数据`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}分钟前更新了数据`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}小时前更新了数据`;
+  return `很久以前更新了数据`;
 }
 </script>
 
@@ -188,5 +284,11 @@ function toggleAdvice(device: number) {
 }
 .advice-section {
   margin-top: 24px;
+}
+.update-time {
+  color: #999;
+  font-size: 0.95rem;
+  margin-top: 8px;
+  margin-bottom: 0;
 }
 </style>
