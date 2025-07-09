@@ -1,0 +1,82 @@
+# 智能电源插座系统技术架构文档
+
+## 1. 系统概述
+智能电源插座系统是基于Flask和Vue.js开发的物联网控制系统，主要功能包括：
+- 远程控制电源开关
+- 定时控制功能
+- 实时电参数监测
+- 用电数据分析
+- 智能建议功能
+
+## 2. 技术架构图
+[架构图说明：分层架构]
+- API层：Flask蓝图路由
+- 业务逻辑层：Service模块
+- 数据访问层：SQLAlchemy ORM
+- 设备通信层：华为云IoT SDK
+
+## 3. 后端技术栈
+### 核心框架
+- Python 3.x
+- Flask 3.0.3
+- Flask-SQLAlchemy 3.1.1
+- marshmallow 3.22.0 (数据序列化)
+
+### 数据库
+- MySQL
+- SQLAlchemy 2.0.40 ORM
+
+### 云服务
+- 华为云IoT平台
+- huaweicloudsdkiotda SDK
+
+### 辅助工具
+- python-dotenv (环境变量管理)
+- Flask-Cors (跨域支持)
+
+## 4. 核心模块设计
+### 4.1 设备控制模块
+- 路径：/command
+- 功能：
+  - 即时控制(Control_Strip)
+  - 定时控制(Control_Strip_time)
+- 技术实现：
+  - 华为云DeviceCommandRequest
+  - 设备状态持久化(DeviceSettings模型)
+
+### 4.2 数据查询模块
+- 路径：/device
+- 功能：
+  - 获取最新电参数(get_latest_electrical)
+  - 获取历史数据(get_electrical_60)
+- 技术实现：
+  - 复杂SQL查询(窗口函数)
+  - 数据序列化(marshmallow)
+
+### 4.3 智能建议模块
+- 路径：/device/advice
+- 功能：提供用电优化建议
+- 技术实现：集成DEEPSEEK API
+
+## 5. 数据库设计
+### 主要表结构
+1. device_properties (设备实时数据)
+   - device_id: 设备ID
+   - voltage: 电压
+   - current: 电流  
+   - power: 功率
+   - electricity: 电量
+   - control_signal: 控制信号
+   - event_time: 事件时间
+
+2. device_settings (设备设置)
+   - device_id: 设备ID
+   - set_time: 设置时间
+   - record_time: 记录时间
+
+## 6. 异常处理
+- 统一API响应格式(api_response)
+- 错误代码：
+  - 400: 请求参数错误
+  - 404: 资源不存在
+  - 500: 服务器内部错误

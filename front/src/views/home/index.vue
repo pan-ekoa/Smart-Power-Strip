@@ -112,7 +112,7 @@ const toggleDeviceStatus = async (deviceId: number) => {
   try {
     // 3. 发送 GET 请求到后端，告知要切换的插座 id 以及新的 status
     await axios.get("http://localhost:6007/command", { params: { id: deviceId, status: newStatus } });
-
+    deviceData.value.Status = newStatus;
     // 4. 前端本地也同步更新 status，保证界面立即响应
   } catch (e) {
     // 5. 如果请求失败，可以在这里做错误处理（比如弹窗提示等）

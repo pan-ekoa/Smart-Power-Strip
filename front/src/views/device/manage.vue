@@ -44,7 +44,15 @@
           查看用电建议
         </el-button>
         <el-card v-if="adviceVisible1" shadow="never" style="margin-top: 12px">
-          用电建议：建议合理安排用电时间，避免高峰期。
+          <div v-if="adviceLoading1" style="text-align: center; padding: 24px 0">
+            <el-icon class="is-loading" style="font-size: 28px"><Loading /></el-icon>
+          </div>
+          <div v-else>
+            <div v-if="adviceList1">
+              <span v-html="adviceList1" class="advice-text advice-inline" />
+            </div>
+            <div v-else class="advice-text">暂无建议</div>
+          </div>
         </el-card>
       </div>
       <el-dialog v-model="timeDialogVisible1" title="设置定时开关时间" width="340px" align-center>
@@ -95,7 +103,15 @@
           查看用电建议
         </el-button>
         <el-card v-if="adviceVisible2" shadow="never" style="margin-top: 12px">
-          用电建议：建议合理安排用电时间，避免高峰期。
+          <div v-if="adviceLoading2" style="text-align: center; padding: 24px 0">
+            <el-icon class="is-loading" style="font-size: 28px"><Loading /></el-icon>
+          </div>
+          <div v-else>
+            <div v-if="adviceList2">
+              <span v-html="adviceList2" class="advice-text advice-inline" />
+            </div>
+            <div v-else class="advice-text">暂无建议</div>
+          </div>
         </el-card>
       </div>
       <el-dialog v-model="timeDialogVisible2" title="设置定时开关时间" width="340px" align-center>
@@ -114,7 +130,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { Clock, InfoFilled } from "@element-plus/icons-vue";
+import { Clock, InfoFilled, Loading } from "@element-plus/icons-vue";
 import axios from "axios";
 import EChartsLine from "@/components/ECharts/EChartsLine.vue";
 const selectedDevice = ref("all");
@@ -142,6 +158,11 @@ const device2Current = ref<number[]>([]);
 const device2Voltage = ref<number[]>([]);
 const device2Power = ref<number[]>([]);
 const device2TimeArray = ref<string[] | number[]>([]);
+
+const adviceList1 = ref<string>("");
+const adviceList2 = ref<string>("");
+const adviceLoading1 = ref(false);
+const adviceLoading2 = ref(false);
 
 const now = ref(Date.now());
 
@@ -178,6 +199,23 @@ async function fetchDeviceArrays(deviceId: number) {
   }
 }
 
+async function fetchAdvice(device: number) {
+  if (device === 1) adviceLoading1.value = true;
+  else if (device === 2) adviceLoading2.value = true;
+  try {
+    const { data } = await axios.get("http://localhost:6007/device/advice", { params: { id: device } });
+    if (data && data.message === "success") {
+      if (device === 1) adviceList1.value = data.data.message;
+      else if (device === 2) adviceList2.value = data.data.message;
+    }
+  } catch (e) {
+    // 可选：错误处理
+  } finally {
+    if (device === 1) adviceLoading1.value = false;
+    else if (device === 2) adviceLoading2.value = false;
+  }
+}
+
 fetchDeviceArrays(1);
 fetchDeviceArrays(2);
 
@@ -194,7 +232,7 @@ function handleSwitch(device: number) {
   const newStatus = isOn ? 1 : 0;
 
   // 2. 发送请求到后端
-  axios.get("http://localhost:6007/command/time", { params: { id: device, status: newStatus } }).catch(() => {
+  axios.get("http://localhost:6007/command", { params: { id: device, status: newStatus } }).catch(() => {
     // 可选：错误处理，比如弹窗提示
   });
 }
@@ -214,8 +252,19 @@ function saveTime(device: number) {
 }
 
 function toggleAdvice(device: number) {
-  if (device === 1) adviceVisible1.value = !adviceVisible1.value;
-  else if (device === 2) adviceVisible2.value = !adviceVisible2.value;
+  if (device === 1) {
+    adviceVisible1.value = !adviceVisible1.value;
+    if (adviceVisible1.value) {
+      adviceList1.value = "";
+      fetchAdvice(1);
+    }
+  } else if (device === 2) {
+    adviceVisible2.value = !adviceVisible2.value;
+    if (adviceVisible2.value) {
+      adviceList2.value = "";
+      fetchAdvice(2);
+    }
+  }
 }
 
 function getUpdateText(ts: number) {
@@ -299,5 +348,21 @@ function getUpdateText(ts: number) {
   font-size: 0.95rem;
   margin-top: 8px;
   margin-bottom: 0;
+}
+.advice-text {
+  font-size: 1rem;
+  color: #666;
+}
+.advice-item {
+  margin: 2px 0;
+  line-height: 1.4;
+  font-size: 1rem;
+}
+.advice-inline {
+  display: inline-block;
+  margin: 0 2px;
+  line-height: 1.5;
+  font-size: 1rem;
+  white-space: pre-line;
 }
 </style>
