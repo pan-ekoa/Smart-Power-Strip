@@ -2,7 +2,7 @@
   <div class="main-wrapper">
     <div class="socket-box">
       <div class="socket-left">
-        <div class="device-title"><span class="device-label">Device</span><span class="device-num">1</span></div>
+        <div class="device-title"><span class="device-label">Device1</span></div>
         <div class="switch-circle" :class="{ on: device1Data.Status === 1, off: device1Data.Status !== 1 }"></div>
         <div class="switch-toggle" @click="toggleDeviceStatus(1)"></div>
       </div>
@@ -29,7 +29,7 @@
     </div>
     <div class="socket-box socket-box-2">
       <div class="socket-left">
-        <div class="device-title"><span class="device-label">Device</span><span class="device-num">2</span></div>
+        <div class="device-title"><span class="device-label">Device2</span></div>
         <div class="switch-circle" :class="{ on: device2Data.Status === 1, off: device2Data.Status !== 1 }"></div>
         <div class="switch-toggle" @click="toggleDeviceStatus(2)"></div>
       </div>
