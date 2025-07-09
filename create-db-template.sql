@@ -17,3 +17,18 @@ CREATE TABLE IF NOT EXISTS device_properties (
     INDEX (device_id),
     INDEX (event_time)
 );
+
+WITH RankedData AS (
+    SELECT 
+        *,
+        ROW_NUMBER() OVER (
+            PARTITION BY device_id 
+            ORDER BY event_time DESC
+        ) AS row_num
+    FROM device_properties
+)
+SELECT 
+    id, device_id, voltage, current, power, electricity, 
+    control_signal, event_time, record_time, created_at
+FROM RankedData
+WHERE row_num <= 60;

@@ -145,7 +145,7 @@ const device2TimeArray = ref<string[] | number[]>([]);
 
 async function fetchDeviceArrays(deviceId: number) {
   try {
-    const { data } = await axios.get("http://localhost:6007/device", { params: { id: deviceId } });
+    const { data } = await axios.get("http://localhost:6007/device/strip", { params: { id: deviceId } });
     if (data && data.message === "success" && data.data) {
       const now = Date.now();
       if (deviceId === 1) {
