@@ -11,7 +11,7 @@
       <div class="device-header">
         <div>
           <h3 class="device-title device-title--deep">Device 1</h3>
-          <div v-if="device1LastUpdate" class="update-time">{{ getUpdateText(device1LastUpdate) }}</div>
+          <div v-if="device1LastUpdate" class="update-time">{{ getUpdateText(device1LastUpdate) }}{{ now && "" }}</div>
         </div>
         <div class="device-actions">
           <el-switch v-model="device1On" @change="handleSwitch(1)" active-text="开" inactive-text="关" />
@@ -62,7 +62,7 @@
       <div class="device-header">
         <div>
           <h3 class="device-title device-title--deep">Device 2</h3>
-          <div v-if="device2LastUpdate" class="update-time">{{ getUpdateText(device2LastUpdate) }}</div>
+          <div v-if="device2LastUpdate" class="update-time">{{ getUpdateText(device2LastUpdate) }}{{ now && "" }}</div>
         </div>
         <div class="device-actions">
           <el-switch v-model="device2On" @change="handleSwitch(2)" active-text="开" inactive-text="关" />
@@ -113,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { Clock, InfoFilled } from "@element-plus/icons-vue";
 import axios from "axios";
 import EChartsLine from "@/components/ECharts/EChartsLine.vue";
@@ -142,6 +142,15 @@ const device2Current = ref<number[]>([]);
 const device2Voltage = ref<number[]>([]);
 const device2Power = ref<number[]>([]);
 const device2TimeArray = ref<string[] | number[]>([]);
+
+const now = ref(Date.now());
+
+onMounted(() => {
+  const timer = setInterval(() => {
+    now.value = Date.now();
+  }, 30000); // 每30秒刷新一次
+  onUnmounted(() => clearInterval(timer));
+});
 
 async function fetchDeviceArrays(deviceId: number) {
   try {
@@ -185,7 +194,7 @@ function handleSwitch(device: number) {
   const newStatus = isOn ? 1 : 0;
 
   // 2. 发送请求到后端
-  axios.get("http://localhost:6007/command", { params: { id: device, status: newStatus } }).catch(() => {
+  axios.get("http://localhost:6007/command/time", { params: { id: device, status: newStatus } }).catch(() => {
     // 可选：错误处理，比如弹窗提示
   });
 }
@@ -197,7 +206,7 @@ function saveTime(device: number) {
   // 这里可以处理保存时间逻辑
   let time = device === 1 ? device1TimePicker.value : device2TimePicker.value;
   // 发送请求到后端
-  axios.get("http://localhost:6007/set_time", { params: { id: device, time } }).catch(() => {
+  axios.get("http://localhost:6007/command/time", { params: { id: device, time } }).catch(() => {
     // 可选：错误处理，比如弹窗提示
   });
   if (device === 1) timeDialogVisible1.value = false;

@@ -18,17 +18,9 @@ CREATE TABLE IF NOT EXISTS device_properties (
     INDEX (event_time)
 );
 
-WITH RankedData AS (
-    SELECT 
-        *,
-        ROW_NUMBER() OVER (
-            PARTITION BY device_id 
-            ORDER BY event_time DESC
-        ) AS row_num
-    FROM device_properties
-)
-SELECT 
-    id, device_id, voltage, current, power, electricity, 
-    control_signal, event_time, record_time, created_at
-FROM RankedData
-WHERE row_num <= 60;
+CREATE TABLE device_settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,  -- 自增主键（可选）
+    device_id VARCHAR(255) NOT NULL,    -- 设备ID，支持字符串
+    set_time DATETIME NOT NULL          -- 设置时间，精确到秒
+    -- 可选唯一约束: UNIQUE(device_id)   -- 如果每个设备只允许一条记录
+);
