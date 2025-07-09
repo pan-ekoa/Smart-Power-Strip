@@ -44,7 +44,7 @@ def DEEPSEEK_API():
     # print(data_summary)
 
 
-    client = OpenAI(api_key="sk-6fce3e20aec24ec58f98da93f513f082", base_url="https://api.deepseek.com")
+    client = OpenAI(api_key="your-key", base_url="https://api.deepseek.com")
 
     response = client.chat.completions.create(
         model="deepseek-chat",
